@@ -18,6 +18,32 @@ export default function Index() {
 
   useEffect(() => {
     // ========================================
+    // OLD IMPLEMENTATION - STATIC JSON FILE
+    // ========================================
+    // This was the previous version that fetched events from a static JSON file hosted on GitHub Gist
+    // Uncomment this section and comment out the Google Calendar API section below to revert to the old implementation
+    /*
+    const apiURL = "https://gist.githubusercontent.com/adhfmz8/acd73178db29e288191901a7dd380872/raw/77450dd827c793917a5ac9cad037db866ad4f481/data.json"
+
+    fetch(apiURL)
+    .then((response)=> response.json())
+    .then((json) => {
+      setData(json);  // Directly set the JSON data (no transformation needed)
+      setLoading(false);
+    })
+    .catch((error) => console.error(error));
+    */
+    // ========================================
+    // END OF OLD IMPLEMENTATION
+    // ========================================
+
+    // ========================================
+    // NEW IMPLEMENTATION - GOOGLE CALENDAR API
+    // ========================================
+    // This is the new version that fetches real-time events from Google Calendar
+    // Comment out this entire section and uncomment the old implementation above to revert
+    
+    // ========================================
     // GOOGLE CALENDAR API CONFIGURATION
     // ========================================
     // API Key: Used to authenticate requests to Google Calendar API
@@ -67,6 +93,7 @@ export default function Index() {
       // ========================================
       // Map each Google Calendar event to our app's EventItem structure
       // This ensures compatibility with our existing UI components
+      // NOTE: The old JSON implementation didn't need this transformation because the data was already in the correct format
       const mappedData = items.map((item: any) => {
         // Extract the start time/date from the event
         // dateTime: Used for events with specific times (e.g., "2025-12-15T14:00:00-07:00")
@@ -91,10 +118,12 @@ export default function Index() {
         // CREATE EVENT ITEM OBJECT
         // ========================================
         // Map Google Calendar fields to our EventItem type:
+        // OLD JSON had: id, title, time, location, description (already in correct format)
+        // NEW API uses: id, summary, start.dateTime/date, location, description (needs transformation)
         return {
           id: item.id,                              // Unique event identifier from Google Calendar
-          title: item.summary || "No Title",        // Event name (summary in Google Calendar API)
-          time: timeString,                         // Formatted time string (created above)
+          title: item.summary || "No Title",        // Event name (summary in Google Calendar API) - was "title" in old JSON
+          time: timeString,                         // Formatted time string (created above) - was already formatted in old JSON
           location: item.location || "TBD",         // Event location (defaults to "TBD" if not specified)
           description: item.description || "",      // Event description/details (empty string if not provided)
         };
@@ -114,6 +143,9 @@ export default function Index() {
       console.error("Error fetching events:", error);
       setLoading(false); // Ensure loading indicator is hidden even if request fails
     });
+    // ========================================
+    // END OF NEW IMPLEMENTATION
+    // ========================================
   }, []); // Empty dependency array: run this effect only once when component mounts
 
   if(isLoading) {
